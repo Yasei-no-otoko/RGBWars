@@ -14,7 +14,6 @@ TILE_SIZE = 32;
 MAP_WIDTH   = 16;
 MAP_HEIGHT  = 16;
 
-
 /**
     タイルを格納する配列
     @type Array
@@ -43,7 +42,7 @@ function initTiles() {
 window.onload = function () {
     enchant();
     var game = new Game(512, 512);
-    game.fps = 2;
+    game.fps = 1;
     game.onload = function () {
         initTiles();
         var map = WorldMap();
@@ -68,10 +67,13 @@ WorldMap =   enchant.Class.create(enchant.Sprite,{
             for ( var j=0; j < MAP_HEIGHT; j++ ) {
                 /* tiles[i][j]のRGB値を参照して色を決定する*/
                 this._ctx.beginPath();
-                this._ctx.fillStyle = 'rgb('
+                var grad  = this._ctx.createLinearGradient(0,0, TILE_SIZE,TILE_SIZE);
+                grad.addColorStop(0,'rgb('
                     + tiles[i][j]._r + ','
                     + tiles[i][j]._g + ','
-                    + tiles[i][j]._b + ')';
+                    + tiles[i][j]._b + ')' );
+                grad.addColorStop(1,'rgb(0, 0, 0)');  // 黒
+                this._ctx.fillStyle = grad;
                 this._ctx.fillRect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
@@ -81,6 +83,8 @@ WorldMap =   enchant.Class.create(enchant.Sprite,{
             var X = Math.floor(e.localX/TILE_SIZE);
             var Y = Math.floor(e.localY/TILE_SIZE);
             tiles[X][Y]._r += 255;
+            tiles[X][Y]._g -= 255;
+            tiles[X][Y]._b -= 255;
         });
         
         this.addEventListener( 'enterframe', function(){
@@ -88,12 +92,17 @@ WorldMap =   enchant.Class.create(enchant.Sprite,{
             for ( var i=0; i < MAP_WIDTH; i++ ) {
                 for ( var j=0; j < MAP_HEIGHT; j++ ) {
                     /* tiles[i][j]のRGB値を参照して色を決定する*/
+                    var r = tiles[i][j]._r;
+                    var g = tiles[i][j]._g;
+                    var b = tiles[i][j]._b;
+                    var posX = i*TILE_SIZE;
+                    var posY = j*TILE_SIZE;
                     this._ctx.beginPath();
-                    this._ctx.fillStyle = 'rgb('
-                        + tiles[i][j]._r + ','
-                        + tiles[i][j]._g + ','
-                        + tiles[i][j]._b + ')';
-                    this._ctx.fillRect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    var grad  = this._ctx.createLinearGradient(posX,posY, posX+TILE_SIZE,posY+TILE_SIZE);
+                    grad.addColorStop(0,'rgb('+r+','+g+','+b+')');
+                    grad.addColorStop(1,'rgb(0, 0, 0)');  // 黒
+                    this._ctx.fillStyle = grad;
+                    this._ctx.fillRect(posX, posY, TILE_SIZE, TILE_SIZE);
                 }
             }
         });
