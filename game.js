@@ -107,6 +107,7 @@ function tileWars (x,y) {
     tiles[x][y]._b += d_b;
     
     rgb_clamp(x,y);
+    tiles[x][y].changeColor();
 }
 
 /**
@@ -121,28 +122,28 @@ function tileAdvance (x,y) {
     var math    =   Math;
     
     
-    if ( tiles[x-1][y]　!= undefined ) {
+    if ( x > 0 ) {
         //左タイルへの進攻
         tiles[x-1][y]._r += math.floor(red/10);
         tiles[x-1][y]._g += math.floor(green/10);
         tiles[x-1][y]._b += math.floor(blue/10);
         rgb_clamp(x-1,y);
     }
-    if ( tiles[x+1][y]　!= undefined ) {
+    if ( x < MAP_WIDTH-1 ) {
         //右タイルへの進攻
         tiles[x+1][y]._r += math.floor(red/10);
         tiles[x+1][y]._g += math.floor(green/10);
         tiles[x+1][y]._b += math.floor(blue/10);
         rgb_clamp(x+1,y);
     }
-    if ( tiles[x][y-1]　!= undefined ) {
+    if ( y > 0 ) {
         //上タイルへの進攻
         tiles[x][y-1]._r += math.floor(red/10);
         tiles[x][y-1]._g += math.floor(green/10);
         tiles[x][y-1]._b += math.floor(blue/10);
         rgb_clamp(x,y-1);
     }
-    if ( tiles[x][y+1]　!= undefined ) {
+    if ( y < MAP_HEIGHT-1 ) {
         //上タイルへの進攻
         tiles[x][y+1]._r += math.floor(red/10);
         tiles[x][y+1]._g += math.floor(green/10);
@@ -194,8 +195,8 @@ RGBWars =   enchant.Class.create(enchant.Group,{
 
     onEnterframe: function(){
         /* 各タイルの */
-        for ( var i=MAP_WIDTH-1; i--;  ) {
-            for ( var j=MAP_WIDTH-1; j--;  ) {
+        for ( var i=MAP_WIDTH; i--;  ) {
+            for ( var j=MAP_WIDTH; j--;  ) {
                 tileWars(i,j)
                 if (tiles[i][j]._r > 0
                 ||  tiles[i][j]._g > 0
