@@ -41,6 +41,15 @@ for ( var i=0; i < MAP_WIDTH; i++ ) {
 }
 
 /**
+    進攻時のタイルを格納する配列
+    @type Array
+*/
+var cacheTiles = new Array(MAP_WIDTH);
+for ( var i=0; i < MAP_WIDTH; i++ ) {
+    cacheTiles[i] = new Array(MAP_HEIGHT);
+}
+
+/**
     タイルの初期化
     @function
 */
@@ -53,20 +62,20 @@ function initTiles() {
         }
     }
 
-    var rX = math.floor( math.random()*(MAP_WIDTH-1) );
-    var rY = math.floor( math.random()*(MAP_HEIGHT-1) );
+    var rX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
+    var rY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
     tiles[rX][rY]._r = 255;
     
-    var gX = math.floor( math.random()*(MAP_WIDTH-1) );
-    var gY = math.floor( math.random()*(MAP_HEIGHT-1) );
+    var gX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
+    var gY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
     for (;;) {
         if ( gX == rX && gY == rY ) {
-            gX = math.floor( math.random()*(MAP_WIDTH-1) );
-            gY = math.floor( math.random()*(MAP_HEIGHT-1) );
+            gX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
+            gY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
         }
         else if ( math.abs(gX-rX) < 6 || math.abs(gY-rY) < 6){
-            gX = math.floor( math.random()*(MAP_WIDTH-1) );
-            gY = math.floor( math.random()*(MAP_HEIGHT-1) );
+            gX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
+            gY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
         }
         else {
             break;
@@ -75,17 +84,17 @@ function initTiles() {
     tiles[gX][gY]._g = 255;
     
     
-    var bX = math.floor( math.random()*(MAP_WIDTH-1) );
-    var bY = math.floor( math.random()*(MAP_HEIGHT-1) );
+    var bX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
+    var bY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
     for (;;) {
         if ( (bX == rX && bY == rY) || (bX == gX && bY == gY) ) {
-            bX = math.floor( math.random()*(MAP_WIDTH-1) );
-            bY = math.floor( math.random()*(MAP_HEIGHT-1) );
+            bX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
+            bY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
         }
         else if ( (math.abs(bX-rX) < 6 || math.abs(bY-rY) < 6)
         ||  (math.abs(bX-gX) < 6 || math.abs(bY-gY) < 6) ) {
-            bX = math.floor( math.random()*(MAP_WIDTH-1) );
-            bY = math.floor( math.random()*(MAP_HEIGHT-1) );
+            bX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
+            bY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
         }
         else {
             break;
@@ -100,9 +109,9 @@ function initTiles() {
     @param  x,y タイルの座標
 */
 function tileWars (x,y) {
-    var red   = tiles[x][y]._r;
-    var green = tiles[x][y]._g;
-    var blue  = tiles[x][y]._b;
+    var red   = cacheTiles[x][y]._r;
+    var green = cacheTiles[x][y]._g;
+    var blue  = cacheTiles[x][y]._b;
     var dR = 0;
     var dG = 0;
     var dB = 0;
@@ -111,38 +120,32 @@ function tileWars (x,y) {
     if ( red > 0) {
         if ( green > 0 ) {
             //赤は緑に強い
-            dR += math.floor(green/8);
-            dG -= math.floor(red/4);
+            dR += math.floor(green/10);
         }
         if ( blue > 0 ) {
             //赤は青に弱い
-            dR -= math.floor(blue/4);
-            dB += math.floor(red/8);
+            dR -= math.floor(blue/2);
         }
     }
     if ( green > 0) {
         if ( blue > 0 ) {
             //緑は青に強い
-            dG += math.floor(blue/8);
-            dB -= math.floor(green/4);
+            dG += math.floor(blue/10);
         }
         if ( red > 0 ) {
             //緑は赤に弱い
-            dG -= math.floor(red/4);
-            dR += math.floor(green/8);
+            dG -= math.floor(red/2);
         }
     }
 
     if ( blue > 0) {
         if ( red > 0 ) {
             //青は赤に強い
-            dB += math.floor(red/8);
-            dR -= math.floor(blue/4);
+            dB += math.floor(red/10);
         }
         if ( green > 0 ) {
             //青は緑に弱い
-            dB -= math.floor(green/4);
-            dG += math.floor(blue/8);
+            dB -= math.floor(green/2);
         }
     }
     
@@ -151,7 +154,7 @@ function tileWars (x,y) {
     tiles[x][y]._b += dB;
     
     rgb_clamp(x,y);
-    tiles[x][y].changeColor();
+    //tiles[x][y].changeColor();
 }
 
 /**
@@ -160,9 +163,9 @@ function tileWars (x,y) {
     @param  x,y         現タイルの座標
 */
 function tileAdvance (x,y) {
-    var red     =   tiles[x][y]._r;
-    var green   =   tiles[x][y]._g;
-    var blue    =   tiles[x][y]._b;
+    var red     =   cacheTiles[x][y]._r;
+    var green   =   cacheTiles[x][y]._g;
+    var blue    =   cacheTiles[x][y]._b;
     var math    =   Math;
 
     if ( x > 0 ) {
@@ -219,41 +222,31 @@ RGBWars =   enchant.Class.create(enchant.Group,{
     onTouch: function(e){
         if ( readyTouch > 0 ) {
             readyTouch--;
+            
             var math = Math;
             var X = math.floor(e.localX/TILE_SIZE);
             var Y = math.floor(e.localY/TILE_SIZE);
-
             tiles[X][Y].AddColor(128,0,0);
         }
     },
 
     onEnterframe: function(){
+        cacheTiles = tiles;
         /* 各タイルの */
         for ( var i=MAP_WIDTH; i--;  ) {
             for ( var j=MAP_WIDTH; j--;  ) {
-                if (tiles[i][j]._r > 0
-                ||  tiles[i][j]._g > 0
-                ||  tiles[i][j]._b > 0) {
+                if (cacheTiles[i][j]._r > 0
+                ||  cacheTiles[i][j]._g > 0
+                ||  cacheTiles[i][j]._b > 0) {
                     tileAdvance(i,j);
+                    tileWars(i,j);
                 }
-                tileWars(i,j);
             }
         }
         for ( var i=MAP_WIDTH; i--;  ) {
             for ( var j=MAP_WIDTH; j--;  ) {
                 tiles[i][j].changeColor();
             }
-        }
-        
-        if ( this.age > 0 && this.age%6 == 0 ) {
-            var math = Math;
-            readyTouch++;
-            var gX = math.floor( math.random()*(MAP_WIDTH-1) );
-            var gY = math.floor( math.random()*(MAP_HEIGHT-1) );
-            tiles[gX][gY].AddColor(0,128,0);
-            var bX = math.floor( math.random()*(MAP_WIDTH-1) );
-            var bY = math.floor( math.random()*(MAP_HEIGHT-1) );
-            tiles[bX][bY].AddColor(0,0,128);
         }
     },
 });
@@ -276,9 +269,7 @@ Tile = enchant.Class.create(enchant.Entity,{
         this._y = y;
         
         this.backgroundColor = 'rgb('+this._r+','+this._g+','+this._b+')';
-        this._element.style.background = 
-            'linear-gradient()'
-        ''
+        this.className = "tile";
     },
     AddColor: function(r,g,b) {
         var math = Math;
@@ -298,10 +289,12 @@ window.onload = function () {
     var game = new Game(MAP_WIDTH*TILE_SIZE, MAP_HEIGHT*TILE_SIZE);
     game.fps = 1;
     game.onload = function () {
+
         initTiles();
         var rgbwars = RGBWars();
         game.rootScene.addChild(rgbwars);
         game.addEventListener( 'enterframe', function() {
+            
             if ( game.frame == 100 ) {
                 var totalR=0;
                 var totalG=0;
@@ -322,6 +315,18 @@ window.onload = function () {
                 }
                 game.stop();
             }
+            if ( game.frame > 0 && game.frame%10 == 0 ) {
+                var math = Math;
+                readyTouch++;
+                
+                var gX = math.floor( math.random()*(MAP_WIDTH-1) );
+                var gY = math.floor( math.random()*(MAP_HEIGHT-1) );
+                tiles[gX][gY].AddColor(0,128,0);
+                var bX = math.floor( math.random()*(MAP_WIDTH-1) );
+                var bY = math.floor( math.random()*(MAP_HEIGHT-1) );
+                tiles[bX][bY].AddColor(0,0,128);
+            }
+            document.title='フレーム:'+game.frame+' 配置可能タイル数:'+readyTouch;
         });
     };
     game.start();
