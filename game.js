@@ -1,4 +1,5 @@
-﻿/**
+﻿enchant();
+/**
     game.js
     @version zero
     @require enchant.js v0.4.3+
@@ -6,6 +7,18 @@
     @author  Haruto Watanabe
     @description    RGBウォーズ本体
 */
+
+/**
+    定数
+*/
+var TILE_SIZE = 32;
+var MAP_WIDTH   = 24;
+var MAP_HEIGHT  = 24;
+
+/**
+    操作可能回数
+*/
+var readyTouch = 1;
 
 /**
     RGB値を255に抑える
@@ -17,13 +30,6 @@ function rgb_clamp(x,y){
     tiles[x][y]._g = math.max(0, math.min(255, tiles[x][y]._g));
     tiles[x][y]._b = math.max(0, math.min(255, tiles[x][y]._b));
 }
-
-/**
-    タイルのサイズとマップ上のタイル数を表す定数
-*/
-TILE_SIZE = 32;
-MAP_WIDTH   = 16;
-MAP_HEIGHT  = 16;
 
 /**
     タイルを格納する配列
@@ -40,14 +46,52 @@ for ( var i=0; i < MAP_WIDTH; i++ ) {
 */
 function initTiles() {
     var math = Math;
+    
     for (var i=MAP_WIDTH; i--; ) {
         for (var j=MAP_HEIGHT; j--; ) {
-            var r = math.floor( math.random()*255 );
-            var g = math.floor( math.random()*255 );
-            var b = math.floor( math.random()*255 );
-            tiles[i][j] = new Tile(r,g,b,i*TILE_SIZE,j*TILE_SIZE);
+            tiles[i][j] = new Tile(0,0,0,i*TILE_SIZE,j*TILE_SIZE);
         }
     }
+
+    var rX = math.floor( math.random()*(MAP_WIDTH-1) );
+    var rY = math.floor( math.random()*(MAP_HEIGHT-1) );
+    tiles[rX][rY]._r = 255;
+    
+    var gX = math.floor( math.random()*(MAP_WIDTH-1) );
+    var gY = math.floor( math.random()*(MAP_HEIGHT-1) );
+    for (;;) {
+        if ( gX == rX && gY == rY ) {
+            gX = math.floor( math.random()*(MAP_WIDTH-1) );
+            gY = math.floor( math.random()*(MAP_HEIGHT-1) );
+        }
+        else if ( math.abs(gX-rX) < 6 || math.abs(gY-rY) < 6){
+            gX = math.floor( math.random()*(MAP_WIDTH-1) );
+            gY = math.floor( math.random()*(MAP_HEIGHT-1) );
+        }
+        else {
+            break;
+        }
+    }
+    tiles[gX][gY]._g = 255;
+    
+    
+    var bX = math.floor( math.random()*(MAP_WIDTH-1) );
+    var bY = math.floor( math.random()*(MAP_HEIGHT-1) );
+    for (;;) {
+        if ( (bX == rX && bY == rY) || (bX == gX && bY == gY) ) {
+            bX = math.floor( math.random()*(MAP_WIDTH-1) );
+            bY = math.floor( math.random()*(MAP_HEIGHT-1) );
+        }
+        else if ( (math.abs(bX-rX) < 6 || math.abs(bY-rY) < 6)
+        ||  (math.abs(bX-gX) < 6 || math.abs(bY-gY) < 6) ) {
+            bX = math.floor( math.random()*(MAP_WIDTH-1) );
+            bY = math.floor( math.random()*(MAP_HEIGHT-1) );
+        }
+        else {
+            break;
+        }
+    }
+    tiles[bX][bY]._b = 255;
 }
 
 /**
@@ -59,52 +103,52 @@ function tileWars (x,y) {
     var red   = tiles[x][y]._r;
     var green = tiles[x][y]._g;
     var blue  = tiles[x][y]._b;
-    var d_r = 0;
-    var d_g = 0;
-    var d_b = 0;
+    var dR = 0;
+    var dG = 0;
+    var dB = 0;
     var math = Math;
     
     if ( red > 0) {
         if ( green > 0 ) {
-            //赤が緑を吸収する
-            d_r += green;
-            d_g -= red;
+            //赤は緑に強い
+            dR += math.floor(green/8);
+            dG -= math.floor(red/4);
         }
         if ( blue > 0 ) {
-            //赤が青に吸収される
-            d_r -= blue;
-            d_b += red;
+            //赤は青に弱い
+            dR -= math.floor(blue/4);
+            dB += math.floor(red/8);
         }
     }
     if ( green > 0) {
         if ( blue > 0 ) {
-            //緑が青を吸収する
-            d_g += blue;
-            d_b -= green;
+            //緑は青に強い
+            dG += math.floor(blue/8);
+            dB -= math.floor(green/4);
         }
         if ( red > 0 ) {
-            //緑が赤に吸収される
-            d_g -= red;
-            d_r += green;
+            //緑は赤に弱い
+            dG -= math.floor(red/4);
+            dR += math.floor(green/8);
         }
     }
 
     if ( blue > 0) {
         if ( red > 0 ) {
-            //青が赤を吸収する
-            d_b += red;
-            d_r -= blue;
+            //青は赤に強い
+            dB += math.floor(red/8);
+            dR -= math.floor(blue/4);
         }
         if ( green > 0 ) {
-            //青が緑に吸収される
-            d_b -= green;
-            d_g += blue;
+            //青は緑に弱い
+            dB -= math.floor(green/4);
+            dG += math.floor(blue/8);
         }
     }
     
-    tiles[x][y]._r += d_r;
-    tiles[x][y]._g += d_g;
-    tiles[x][y]._b += d_b;
+    tiles[x][y]._r += dR;
+    tiles[x][y]._g += dG;
+    tiles[x][y]._b += dB;
     
     rgb_clamp(x,y);
     tiles[x][y].changeColor();
@@ -120,8 +164,7 @@ function tileAdvance (x,y) {
     var green   =   tiles[x][y]._g;
     var blue    =   tiles[x][y]._b;
     var math    =   Math;
-    
-    
+
     if ( x > 0 ) {
         //左タイルへの進攻
         tiles[x-1][y]._r += math.floor(red/10);
@@ -144,24 +187,12 @@ function tileAdvance (x,y) {
         rgb_clamp(x,y-1);
     }
     if ( y < MAP_HEIGHT-1 ) {
-        //上タイルへの進攻
+        //下タイルへの進攻
         tiles[x][y+1]._r += math.floor(red/10);
         tiles[x][y+1]._g += math.floor(green/10);
         tiles[x][y+1]._b += math.floor(blue/10);
         rgb_clamp(x,y+1);
     }
-}
-
-window.onload = function () {
-    enchant();
-    var game = new Game(MAP_WIDTH*TILE_SIZE, MAP_HEIGHT*TILE_SIZE);
-    game.fps = 1;
-    game.onload = function () {
-        initTiles();
-        var rgbwars = RGBWars();
-        game.rootScene.addChild(rgbwars);
-    };
-    game.start();
 }
 
 /**
@@ -186,25 +217,43 @@ RGBWars =   enchant.Class.create(enchant.Group,{
     },
 
     onTouch: function(e){
-        var math = Math;
-        var X = math.floor(e.localX/TILE_SIZE);
-        var Y = math.floor(e.localY/TILE_SIZE);
+        if ( readyTouch > 0 ) {
+            readyTouch--;
+            var math = Math;
+            var X = math.floor(e.localX/TILE_SIZE);
+            var Y = math.floor(e.localY/TILE_SIZE);
 
-        tiles[X][Y].AddColor(255,0,0);
+            tiles[X][Y].AddColor(128,0,0);
+        }
     },
 
     onEnterframe: function(){
         /* 各タイルの */
         for ( var i=MAP_WIDTH; i--;  ) {
             for ( var j=MAP_WIDTH; j--;  ) {
-                tileWars(i,j)
                 if (tiles[i][j]._r > 0
                 ||  tiles[i][j]._g > 0
                 ||  tiles[i][j]._b > 0) {
                     tileAdvance(i,j);
                 }
+                tileWars(i,j);
+            }
+        }
+        for ( var i=MAP_WIDTH; i--;  ) {
+            for ( var j=MAP_WIDTH; j--;  ) {
                 tiles[i][j].changeColor();
             }
+        }
+        
+        if ( this.age > 0 && this.age%6 == 0 ) {
+            var math = Math;
+            readyTouch++;
+            var gX = math.floor( math.random()*(MAP_WIDTH-1) );
+            var gY = math.floor( math.random()*(MAP_HEIGHT-1) );
+            tiles[gX][gY].AddColor(0,128,0);
+            var bX = math.floor( math.random()*(MAP_WIDTH-1) );
+            var bY = math.floor( math.random()*(MAP_HEIGHT-1) );
+            tiles[bX][bY].AddColor(0,0,128);
         }
     },
 });
@@ -214,50 +263,66 @@ RGBWars =   enchant.Class.create(enchant.Group,{
     @description
     タイル情報
 */
-Tile = enchant.Class.create(enchant.Sprite,{
+Tile = enchant.Class.create(enchant.Entity,{
     initialize: function(r,g,b,x,y) {
-        enchant.Sprite.call(this,TILE_SIZE,TILE_SIZE);
+        enchant.Entity.call(this,TILE_SIZE,TILE_SIZE);
 
         this._r = r;
         this._g = g;
         this._b = b;
+        this.width = TILE_SIZE;
+        this.height = TILE_SIZE;
         this._x = x;
         this._y = y;
-
-        this._surface = new Surface(TILE_SIZE,TILE_SIZE);
-            this._ctx   = this._surface.context;
-            this._ctx.beginPath();
-                var grad  = this._ctx.createLinearGradient(0,0, TILE_SIZE,TILE_SIZE);
-                grad.addColorStop(0,'rgb('+this._r+','+this._g+','+this._b+')');
-                grad.addColorStop(1,'rgb(0, 0, 0)');  // 黒
-            this._ctx.fillStyle = grad;
-            this._ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-        this.image  = this._surface;
+        
+        this.backgroundColor = 'rgb('+this._r+','+this._g+','+this._b+')';
+        this._element.style.background = 
+            'linear-gradient()'
+        ''
     },
     AddColor: function(r,g,b) {
-        this._r = r;
-        this._g = g;
-        this._b = b;
-        
-        this._surface = new Surface(TILE_SIZE,TILE_SIZE);
-            this._ctx   = this._surface.context;
-            this._ctx.beginPath();
-                var grad  = this._ctx.createLinearGradient(0,0, TILE_SIZE,TILE_SIZE);
-                grad.addColorStop(0,'rgb('+this._r+','+this._g+','+this._b+')');
-                grad.addColorStop(1,'rgb(0, 0, 0)');  // 黒
-            this._ctx.fillStyle = grad;
-            this._ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-        this.image  = this._surface;
+        var math = Math;
+        this._r += r;
+        this._g += g;
+        this._b += b;
+        rgb_clamp( math.floor(this._x/TILE_SIZE),math.floor(this._y/TILE_SIZE) );
+
+        this.backgroundColor = 'rgb('+this._r+','+this._g+','+this._b+')';
     },
     changeColor: function() {
-        this._surface = new Surface(TILE_SIZE,TILE_SIZE);
-            this._ctx   = this._surface.context;
-            this._ctx.beginPath();
-                var grad  = this._ctx.createLinearGradient(0,0, TILE_SIZE,TILE_SIZE);
-                grad.addColorStop(0,'rgb('+this._r+','+this._g+','+this._b+')');
-                grad.addColorStop(1,'rgb(0, 0, 0)');  // 黒
-            this._ctx.fillStyle = grad;
-            this._ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
-        this.image  = this._surface;
+        this.backgroundColor = 'rgb('+this._r+','+this._g+','+this._b+')';
     }
 });
+
+window.onload = function () {
+    var game = new Game(MAP_WIDTH*TILE_SIZE, MAP_HEIGHT*TILE_SIZE);
+    game.fps = 1;
+    game.onload = function () {
+        initTiles();
+        var rgbwars = RGBWars();
+        game.rootScene.addChild(rgbwars);
+        game.addEventListener( 'enterframe', function() {
+            if ( game.frame == 100 ) {
+                var totalR=0;
+                var totalG=0;
+                var totalB=0;
+                for ( var i=MAP_WIDTH; i--; ) {
+                    for ( var j=MAP_HEIGHT; j-- ; ) {
+                        totalR += tiles[i][j]._r;
+                        totalG += tiles[i][j]._g;
+                        totalB += tiles[i][j]._b;
+                    }
+                }
+                if ( totalR >= totalG && totalR >= totalB ) {
+                    alert('トップは赤です。全体のRGB値は'+totalR+','+totalG+','+totalB+'でした。');
+                }   else if (totalG >= totalB)  {
+                    alert('トップは緑です。全体のRGB値は'+totalR+','+totalG+','+totalB+'でした。');
+                }   else    {
+                    alert('トップは青です。全体のRGB値は'+totalR+','+totalG+','+totalB+'でした。');
+                }
+                game.stop();
+            }
+        });
+    };
+    game.start();
+}
