@@ -12,8 +12,8 @@
     定数
 */
 var TILE_SIZE = 32;
-var MAP_WIDTH   = 24;
-var MAP_HEIGHT  = 24;
+var MAP_WIDTH   = 16;
+var MAP_HEIGHT  = 16;
 
 /**
     操作可能回数
@@ -73,7 +73,8 @@ function initTiles() {
             gX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
             gY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
         }
-        else if ( math.abs(gX-rX) < 6 || math.abs(gY-rY) < 6){
+        else if ( math.abs(gX-rX) < math.floor(MAP_WIDTH/4) 
+        || math.abs(gY-rY) < math.floor(MAP_HEIGHT/4)){
             gX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
             gY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
         }
@@ -91,8 +92,15 @@ function initTiles() {
             bX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
             bY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
         }
-        else if ( (math.abs(bX-rX) < 6 || math.abs(bY-rY) < 6)
-        ||  (math.abs(bX-gX) < 6 || math.abs(bY-gY) < 6) ) {
+        else if (
+            (       math.abs(bX-rX) < math.floor(MAP_WIDTH/4)
+                ||  math.abs(bY-rY) < math.floor(MAP_HEIGHT/4)
+            )
+            ||
+            (       math.abs(bX-gX) < math.floor(MAP_WIDTH/4)
+                ||  math.abs(bY-gY) < math.floor(MAP_HEIGHT/4)
+            )
+        ) {
             bX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
             bY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
         }
