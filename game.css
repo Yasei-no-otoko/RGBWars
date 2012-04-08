@@ -1,7 +1,7 @@
 .tile {
-    -webkit-border-radius: 25%;
-    -moz-border-radius: 25%;
-    -o-border-radius: 25%;
-    -ms-border-radius: 25%;
-    border-radius: 25%;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    -o-border-radius: 12px;
+    -ms-border-radius: 12px;
+    border-radius: 12px;
 }
