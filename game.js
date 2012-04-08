@@ -14,6 +14,7 @@
 var TILE_SIZE = 32;
 var MAP_WIDTH   = 16;
 var MAP_HEIGHT  = 16;
+var GAME_LENGTH  = 100;
 
 /**
     操作可能回数
@@ -303,7 +304,7 @@ window.onload = function () {
         game.rootScene.addChild(rgbwars);
         game.addEventListener( 'enterframe', function() {
             
-            if ( game.frame == 100 ) {
+            if ( game.frame == GAME_LENGTH ) {
                 var totalR=0;
                 var totalG=0;
                 var totalB=0;
@@ -322,8 +323,7 @@ window.onload = function () {
                     alert('トップは青です。全体のRGB値は'+totalR+','+totalG+','+totalB+'でした。');
                 }
                 game.stop();
-            }
-            if ( game.frame > 0 && game.frame%10 == 0 ) {
+            } else if ( game.frame > 0 && game.frame%10 == 0 ) {
                 var math = Math;
                 readyTouch++;
                 
@@ -334,7 +334,7 @@ window.onload = function () {
                 var bY = math.floor( math.random()*(MAP_HEIGHT-1) );
                 tiles[bX][bY].AddColor(0,0,128);
             }
-            document.title='フレーム:'+game.frame+' 配置可能タイル数:'+readyTouch;
+            document.title='残りフレーム:'+(GAME_LENGTH-game.frame)+' 残りタイル数:'+readyTouch;
         });
     };
     game.start();
