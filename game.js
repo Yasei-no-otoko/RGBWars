@@ -12,21 +12,24 @@
     定数
 */
 var TILE_SIZE   = 32;
-var MAP_WIDTH   = 16;
-var MAP_HEIGHT  = 16;
-var GAME_LENGTH = 100;
-var GAME_FPS    = 1;
+var MAP_WIDTH   = (debug) ? 32 : 16;
+var MAP_HEIGHT  = (debug) ? 32 : 16;
+var GAME_FPS    = (debug) ? 30 : 1;
+var GAME_LENGTH = (debug) ? 500 : 100;
 
 window.onload = function () {
     var game = new Game(MAP_WIDTH*TILE_SIZE, MAP_HEIGHT*TILE_SIZE);
     game.fps = GAME_FPS;
 
-    alert('このゲームは、赤・緑・青の3色が争うリアルタイムシミュレーションゲームです。');
-    alert('このゲームでは1秒当たり'+game.fps+'ターンの処理が行われます。');
-    alert(game.fps*10+'ターンごとにマップ上に自陣営の色を配置することが可能になります。');
-    alert('あなたは赤色で、緑に強いですが青には負けてしまいます。');
-    alert('100ターンの間に上手くタイルを配置して勝利してください。');
-    
+    if ( debug ) {
+        alert('これはテスト用の大規模・高速モードです。スペック試しにどうぞ');
+    } else {
+        alert('このゲームは、赤・緑・青の3色が争うリアルタイムシミュレーションゲームです。');
+        alert('このゲームでは1秒当たり'+game.fps+'ターンの処理が行われます。');
+        alert(game.fps*10+'ターンごとにマップ上に自陣営の色を配置することが可能になります。');
+        alert('あなたは赤色で、緑に強いですが青には負けてしまいます。');
+        alert('100ターンの間に上手くタイルを配置して勝利してください。');
+    }
 
     game.onload = function () {
         var tileMap = new TileMap();
@@ -53,7 +56,9 @@ window.onload = function () {
                 }
                 game.stop();
             } else if ( game.frame > 0 && game.frame%10 == 0 ) {
-                alert('タイルに色を配置可能になりました（'+tileMap.readyTouch+'回）');
+                if ( !debug ) {
+                    alert('タイルに色を配置可能になりました（あと'+tileMap.readyTouch+'回）');
+                }
             }
             document.title='残りフレーム:'+(GAME_LENGTH-game.frame);
         });
