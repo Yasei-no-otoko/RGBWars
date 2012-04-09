@@ -11,15 +11,23 @@
 /**
     定数
 */
-var TILE_SIZE = 32;
+var TILE_SIZE   = 32;
 var MAP_WIDTH   = 16;
 var MAP_HEIGHT  = 16;
-var GAME_LENGTH  = 100;
+var GAME_LENGTH = 100;
+var GAME_FPS    = 1;
 
 window.onload = function () {
     var game = new Game(MAP_WIDTH*TILE_SIZE, MAP_HEIGHT*TILE_SIZE);
-    game.fps = 1;
+    game.fps = GAME_FPS;
+
+    alert('このゲームは、赤・緑・青の3色が争うリアルタイムシミュレーションゲームです。');
+    alert('このゲームでは1秒当たり'+game.fps+'ターンの処理が行われます。');
+    alert(game.fps*10+'ターンごとにマップ上に自陣営の色を配置することが可能になります。');
+    alert('あなたは赤色で、緑に強いですが青には負けてしまいます。');
+    alert('100ターンの間に上手くタイルを配置して勝利してください。');
     
+
     game.onload = function () {
         var tileMap = new TileMap();
         game.rootScene.addChild(tileMap);
@@ -37,15 +45,17 @@ window.onload = function () {
                     }
                 }
                 if ( totalR >= totalG && totalR >= totalB ) {
-                    alert('トップは赤です。全体のRGB値は'+totalR+','+totalG+','+totalB+'でした。');
+                    alert('勝者は赤です。全体のRGB値は'+totalR+','+totalG+','+totalB+'でした。');
                 }   else if (totalG >= totalB)  {
-                    alert('トップは緑です。全体のRGB値は'+totalR+','+totalG+','+totalB+'でした。');
+                    alert('勝者は緑です。全体のRGB値は'+totalR+','+totalG+','+totalB+'でした。');
                 }   else    {
-                    alert('トップは青です。全体のRGB値は'+totalR+','+totalG+','+totalB+'でした。');
+                    alert('勝者は青です。全体のRGB値は'+totalR+','+totalG+','+totalB+'でした。');
                 }
                 game.stop();
+            } else if ( game.frame > 0 && game.frame%10 == 0 ) {
+                alert('タイルに色を配置可能になりました（'+tileMap.readyTouch+'回）');
             }
-            document.title='残りフレーム:'+(GAME_LENGTH-game.frame)+' 残りタイル数:'+tileMap.readyTouch;
+            document.title='残りフレーム:'+(GAME_LENGTH-game.frame);
         });
     };
     game.start();
