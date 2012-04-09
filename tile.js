@@ -49,7 +49,7 @@ Tile = enchant.Class.create(enchant.Entity,{
     },
 
     /**
-        RGB値を255に抑える
+        RGB値を0~255に抑える
         @function
     */
     rgbClamp : function (){
@@ -301,5 +301,5 @@ TileMap =   enchant.Class.create(enchant.Group,{
         this.tiles[x][y]._g += dG;
         this.tiles[x][y]._b += dB;
         this.tiles[x][y].rgbClamp();
-    },
+    }
 });
