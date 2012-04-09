@@ -16,15 +16,20 @@ Tile = enchant.Class.create(enchant.Entity,{
         this._r = r;
         this._g = g;
         this._b = b;
-        
+
         this.width = TILE_SIZE;
         this.height = TILE_SIZE;
         this._x = x;
         this._y = y;
-        
+
         this.backgroundColor = 'rgb('+this._r+','+this._g+','+this._b+')';
         this.className = "tile";
     },
+
+    /**
+        色を加算する
+        @function
+    */
     addColor: function(r,g,b) {
         var math = Math;
         this._r += r;
@@ -34,9 +39,15 @@ Tile = enchant.Class.create(enchant.Entity,{
 
         this.backgroundColor = 'rgb('+this._r+','+this._g+','+this._b+')';
     },
+
+    /**
+        表示を更新する
+        @function
+    */
     updateView: function() {
         this.backgroundColor = 'rgb('+this._r+','+this._g+','+this._b+')';
     },
+
     /**
         RGB値を255に抑える
         @function
@@ -59,16 +70,19 @@ TileMap =   enchant.Class.create(enchant.Group,{
 
         /* タイルを初期化する */
         this.initTiles();
-        
+
+        /* タイル追加操作の残り回数 */
+        this.readyTouch = 1;
+
         /* 一つのCanvasオブジェクトに全てのタイルを描画する */
         for ( var i=MAP_WIDTH; i--; ) {
             for ( var j=MAP_HEIGHT; j-- ; ) {
                 this.addChild(this.tiles[i][j]);
             }
         }
-        
+
         this.addEventListener( 'touchstart', this.onTouch );
-        
+
         this.addEventListener( 'enterframe', this.onEnterframe );
     },
 
@@ -87,7 +101,7 @@ TileMap =   enchant.Class.create(enchant.Group,{
         for ( var i=0; i < MAP_WIDTH; i++ ) {
             this.tiles[i] = new Array(MAP_HEIGHT);
         }
-        
+
         for (var i=MAP_WIDTH; i--; ) {
             for (var j=MAP_HEIGHT; j--; ) {
                 this.tiles[i][j] = new Tile(0,0,0,i*TILE_SIZE,j*TILE_SIZE);
@@ -98,7 +112,7 @@ TileMap =   enchant.Class.create(enchant.Group,{
         var rX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
         var rY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
         this.tiles[rX][rY]._r = 255;
-        
+
         /* 緑255を赤と近すぎない位置に配置する */
         var gX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
         var gY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
@@ -117,7 +131,7 @@ TileMap =   enchant.Class.create(enchant.Group,{
             }
         }
         this.tiles[gX][gY]._g = 255;
-        
+
         /* 青255を赤、緑と近すぎない位置に配置する */
         var bX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
         var bY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
@@ -125,29 +139,33 @@ TileMap =   enchant.Class.create(enchant.Group,{
             if ( (bX == rX && bY == rY) || (bX == gX && bY == gY) ) {
                 bX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
                 bY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
-            }
-            else if (
-                (       math.abs(bX-rX) < math.floor(MAP_WIDTH/4)
-                    ||  math.abs(bY-rY) < math.floor(MAP_HEIGHT/4)
+            } else if
+                (
+                    (       math.abs(bX-rX) < math.floor(MAP_WIDTH/4)
+                        ||  math.abs(bY-rY) < math.floor(MAP_HEIGHT/4)
+                    )
+                    ||
+                    (       math.abs(bX-gX) < math.floor(MAP_WIDTH/4)
+                        ||  math.abs(bY-gY) < math.floor(MAP_HEIGHT/4)
+                    )
                 )
-                ||
-                (       math.abs(bX-gX) < math.floor(MAP_WIDTH/4)
-                    ||  math.abs(bY-gY) < math.floor(MAP_HEIGHT/4)
-                )
-            ) {
+            {
                 bX = math.floor( math.random()*(MAP_WIDTH-2)+1 );
                 bY = math.floor( math.random()*(MAP_HEIGHT-2)+1 );
-            }
-            else {
+            } else {
                 break;
             }
         }
         this.tiles[bX][bY]._b = 255;
     },
 
+    /**
+        タッチ（クリック）したタイルに自分の色を追加する
+        @function
+    */
     onTouch: function(e){
-        if ( readyTouch > 0 ) {
-            readyTouch--;
+        if ( this.readyTouch > 0 ) {
+            this.readyTouch--;
             
             var math = Math;
             var X = math.floor(e.localX/TILE_SIZE);
@@ -156,30 +174,45 @@ TileMap =   enchant.Class.create(enchant.Group,{
         }
     },
 
+    /**
+        毎フレーム行われる処理
+    */
     onEnterframe: function(){
         var cacheTiles = this.tiles;
-        /* 各タイルの */
-        for ( var i=MAP_WIDTH; i--;  ) {
-            for ( var j=MAP_WIDTH; j--;  ) {
-                if (cacheTiles[i][j]._r > 0
-                ||  cacheTiles[i][j]._g > 0
-                ||  cacheTiles[i][j]._b > 0) {
-                    this.tileAdvance(i,j,cacheTiles[i][j]);
-                    this.tileWars(i,j);
-                }
+
+        /* 進攻処理 */
+        for ( var i=0; i<MAP_WIDTH; i++ ) {
+            for ( var j=0; j<MAP_HEIGHT; j++ ) {
+                this.tileAdvance(i,j,cacheTiles[i][j]);
             }
         }
-        for ( var i=MAP_WIDTH; i--;  ) {
-            for ( var j=MAP_WIDTH; j--;  ) {
+
+        /* 進攻後の交戦処理と表示の更新 */
+        for ( var i=MAP_WIDTH; i--; ) {
+            for ( var j=MAP_HEIGHT; j--; ) {
+                this.tileWars(i,j);
                 this.tiles[i][j].updateView();
             }
         }
+
+        if ( this.age > 0 && this.age%10 == 0 ) {
+            var math = Math;
+            this.readyTouch++;
+            
+            var gX = math.floor( math.random()*(MAP_WIDTH-1) );
+            var gY = math.floor( math.random()*(MAP_HEIGHT-1) );
+            this.tiles[gX][gY].addColor(0,128,0);
+            var bX = math.floor( math.random()*(MAP_WIDTH-1) );
+            var bY = math.floor( math.random()*(MAP_HEIGHT-1) );
+            this.tiles[bX][bY].addColor(0,0,128);
+        }
     },
-    
+
     /**
         周囲タイルへの進攻
         @function
         @param  x,y         現タイルの座標
+        @param  cacheTile   フレーム開始時のタイル情報
     */
     tileAdvance : function (x,y,cacheTile) {
         var red     =   cacheTile._r;
@@ -216,6 +249,7 @@ TileMap =   enchant.Class.create(enchant.Group,{
             this.tiles[x][y+1].rgbClamp();
         }
     },
+
     /**
         タイル内での戦争
         @function
@@ -240,6 +274,7 @@ TileMap =   enchant.Class.create(enchant.Group,{
                 dR -= math.floor(blue/2);
             }
         }
+
         if ( green > 0) {
             if ( blue > 0 ) {
                 //緑は青に強い
@@ -261,7 +296,7 @@ TileMap =   enchant.Class.create(enchant.Group,{
                 dB -= math.floor(green/2);
             }
         }
-        
+
         this.tiles[x][y]._r += dR;
         this.tiles[x][y]._g += dG;
         this.tiles[x][y]._b += dB;

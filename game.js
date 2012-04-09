@@ -16,16 +16,11 @@ var MAP_WIDTH   = 16;
 var MAP_HEIGHT  = 16;
 var GAME_LENGTH  = 100;
 
-/**
-    操作可能回数
-*/
-var readyTouch = 1;
-
 window.onload = function () {
     var game = new Game(MAP_WIDTH*TILE_SIZE, MAP_HEIGHT*TILE_SIZE);
     game.fps = 1;
+    
     game.onload = function () {
-        
         var tileMap = new TileMap();
         game.rootScene.addChild(tileMap);
 
@@ -49,18 +44,8 @@ window.onload = function () {
                     alert('トップは青です。全体のRGB値は'+totalR+','+totalG+','+totalB+'でした。');
                 }
                 game.stop();
-            } else if ( game.frame > 0 && game.frame%10 == 0 ) {
-                var math = Math;
-                readyTouch++;
-                
-                var gX = math.floor( math.random()*(MAP_WIDTH-1) );
-                var gY = math.floor( math.random()*(MAP_HEIGHT-1) );
-                tileMap.tiles[gX][gY].addColor(0,128,0);
-                var bX = math.floor( math.random()*(MAP_WIDTH-1) );
-                var bY = math.floor( math.random()*(MAP_HEIGHT-1) );
-                tileMap.tiles[bX][bY].addColor(0,0,128);
             }
-            document.title='残りフレーム:'+(GAME_LENGTH-game.frame)+' 残りタイル数:'+readyTouch;
+            document.title='残りフレーム:'+(GAME_LENGTH-game.frame)+' 残りタイル数:'+tileMap.readyTouch;
         });
     };
     game.start();
