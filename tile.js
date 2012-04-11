@@ -34,11 +34,11 @@ Tile = enchant.Class.create(enchant.Entity,
         this._r = r;
         this._g = g;
         this._b = b;
-
-        this._width = TILE_SIZE;
-        this._height = TILE_SIZE;
         this._x = x;
         this._y = y;
+
+        this.height = TILE_SIZE;
+        this.width = TILE_SIZE;
 
         this.backgroundColor = 'rgb('+this._r+','+this._g+','+this._b+')';
         this.className = "tile";

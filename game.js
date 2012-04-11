@@ -1,4 +1,5 @@
-﻿/**
+﻿enchant();
+/**
     @fileOverview　RGBウォーズのメインループと定数を記述
     @author  <a href="mailto:dailioh@gmail.com">Haruto Watanabe</a>
     @require enchant.js
@@ -31,7 +32,6 @@ var GAME_FPS    = (debug) ? 30 : 1;
  */
 var GAME_LENGTH = (debug) ? 500 : 100;
 
-enchant();
 
 /** ウィンドウが読み込まれた時に実行 */
 window.onload = function () {
