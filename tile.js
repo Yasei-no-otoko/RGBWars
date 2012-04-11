@@ -1,15 +1,33 @@
 ﻿/**
-    tile.js
+    @fileOverview RGBウォーズのタイルとタイルマップのクラスを記述
     @require enchant.js v0.4.3+
-    @author  Haruto Watanabe
-    @description    タイル部分の実装
-*/
+    @author  <a href="mailto:dailioh@gmail.com">Haruto Watanabe</a>
+ */
 
 /**
-    @extends    enchant.Entity
-    @description    タイル情報
-*/
-Tile = enchant.Class.create(enchant.Entity,{
+    @class  各タイルの情報を格納するクラス
+    @property {Number} r R値
+    @property {Number} g G値
+    @property {Number} b B値
+    @property {Number} width タイルの幅
+    @property {Number} height タイルの高さ
+    @property {Number} x タイルのx座標
+    @property {Number} y タイルのy座標
+    @extends enchant.Entity
+    
+ */
+Tile = enchant.Class.create(enchant.Entity,
+/**@scope    Tile.prototype*/
+{
+    /**
+        クラスの初期化
+        @function
+        @param {Number} r R値の初期値
+        @param {Number} g G値の初期値
+        @param {Number} b B値の初期値
+        @param {Number} x タイルの初期x座標
+        @param {Number} y タイルの初期y座標
+     */
     initialize: function(r,g,b,x,y) {
         enchant.Entity.call(this,TILE_SIZE,TILE_SIZE);
 
@@ -17,8 +35,8 @@ Tile = enchant.Class.create(enchant.Entity,{
         this._g = g;
         this._b = b;
 
-        this.width = TILE_SIZE;
-        this.height = TILE_SIZE;
+        this._width = TILE_SIZE;
+        this._height = TILE_SIZE;
         this._x = x;
         this._y = y;
 
@@ -29,7 +47,10 @@ Tile = enchant.Class.create(enchant.Entity,{
     /**
         色を加算する
         @function
-    */
+        @param {Number} r 加算するR値
+        @param {Number} g 加算するG値
+        @param {Number} b 加算するB値
+     */
     addColor: function(r,g,b) {
         var math = Math;
         this._r += r;
@@ -43,7 +64,7 @@ Tile = enchant.Class.create(enchant.Entity,{
     /**
         表示を更新する
         @function
-    */
+     */
     updateView: function() {
         this.backgroundColor = 'rgb('+this._r+','+this._g+','+this._b+')';
     },
@@ -51,7 +72,7 @@ Tile = enchant.Class.create(enchant.Entity,{
     /**
         RGB値を0~255に抑える
         @function
-    */
+     */
     rgbClamp : function (){
         var math = Math;
         this._r = math.max(0, math.min(255, this._r));
@@ -61,10 +82,17 @@ Tile = enchant.Class.create(enchant.Entity,{
 });
 
 /**
+　   @class  タイルで形成されたマップ全体を表すクラス
+    @property {Number} readyTouch タイル追加操作の残り回数
     @extends enchant.Group
-    @description    タイルマップを管理する
-*/
-TileMap =   enchant.Class.create(enchant.Group,{
+ */
+TileMap =   enchant.Class.create(enchant.Group,
+/** @scope  TileMap.prototype */
+{
+    /**
+        クラスの初期化
+        @function
+     */
     initialize: function(){
         enchant.Group.call(this,MAP_WIDTH*TILE_SIZE,MAP_HEIGHT*TILE_SIZE);
 
@@ -89,19 +117,20 @@ TileMap =   enchant.Class.create(enchant.Group,{
     /**
         タイルの初期化
         @function
-    */
+     */
     initTiles : function () {
         var math = Math;
 
         /**
             タイルを格納する配列
             @type Array
-        */
+         */
         this.tiles = new Array(MAP_WIDTH);
         for ( var i=0; i < MAP_WIDTH; i++ ) {
             this.tiles[i] = new Array(MAP_HEIGHT);
         }
 
+        /*　タイルを初期化する */
         for (var i=MAP_WIDTH; i--; ) {
             for (var j=MAP_HEIGHT; j--; ) {
                 this.tiles[i][j] = new Tile(0,0,0,i*TILE_SIZE,j*TILE_SIZE);
@@ -161,8 +190,9 @@ TileMap =   enchant.Class.create(enchant.Group,{
 
     /**
         タッチ（クリック）したタイルに自分の色を追加する
-        @function
-    */
+        @param  {Event} e タッチされた座標を取得するためのイベントオブジェクト
+        @event
+     */
     onTouch: function(e){
         if ( this.readyTouch > 0 ) {
             this.readyTouch--;
@@ -176,7 +206,8 @@ TileMap =   enchant.Class.create(enchant.Group,{
 
     /**
         毎フレーム行われる処理
-    */
+        @event
+     */
     onEnterframe: function(){
         var cacheTiles = this.tiles;
 
@@ -195,6 +226,7 @@ TileMap =   enchant.Class.create(enchant.Group,{
             }
         }
 
+        /* タッチ可能回数を増やす */
         if ( this.age > 0 && this.age%10 == 0 ) {
             var math = Math;
             this.readyTouch++;
@@ -211,9 +243,10 @@ TileMap =   enchant.Class.create(enchant.Group,{
     /**
         周囲タイルへの進攻
         @function
-        @param  x,y         現タイルの座標
-        @param  cacheTile   フレーム開始時のタイル情報
-    */
+        @param x タイルの座標
+        @param y タイルの座標
+        @param cacheTile 他のタイルでの進攻結果が反映されないようにフレーム開始時のタイル情報を用いる
+     */
     tileAdvance : function (x,y,cacheTile) {
         var red     =   cacheTile._r;
         var green   =   cacheTile._g;
@@ -253,8 +286,9 @@ TileMap =   enchant.Class.create(enchant.Group,{
     /**
         タイル内での戦争
         @function
-        @param  x,y タイルの座標
-    */
+        @param x タイルの座標
+        @param y タイルの座標
+     */
     tileWars : function (x,y) {
         var red   = this.tiles[x][y]._r;
         var green = this.tiles[x][y]._g;
