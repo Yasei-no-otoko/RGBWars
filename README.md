@@ -13,6 +13,13 @@
 (1) wizard.htmlを開く  
 (2) http://rgbwars-rukantos.dotcloud.com/wizard.html へアクセスする  
 
+※1  
+ PC上での動作はOpera 12.00/Internet Explorer 9/Firefox 11/Safari5.1/Chrome 20  
+ スマートフォン上での動作はMobile Safari@iOS5.1/Android Browser@Android2.3.3で確認を行いました。  
+ 
+※2  
+ 大規模・高速モードは非常に処理の負荷が高いため、実行する際はChromeの最新バージョンを推奨します。
+
 ファイルリスト
 ----------
 ・README.md  
