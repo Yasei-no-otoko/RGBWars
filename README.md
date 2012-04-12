@@ -6,11 +6,12 @@
 実行方法
 ----------
 ・通常モードを実行する場合  
-(1)index.htmlを開く  
-(2) * http://rgbwars-rukantos.dotcloud.com/ へアクセスする  
+(1) index.htmlを開く  
+(2) http://rgbwars-rukantos.dotcloud.com/ へアクセスする  
+
 ・大規模・高速モードを実行する場合  
-(1)wizard.htmlを開く  
-(2) * http://rgbwars-rukantos.dotcloud.com/wizard.html へアクセスする  
+(1) wizard.htmlを開く  
+(2) http://rgbwars-rukantos.dotcloud.com/wizard.html へアクセスする  
 
 ファイルリスト
 ----------
@@ -36,7 +37,7 @@
 　Closure Compilerで圧縮した軽量ファイルです。  
 
 ・compile.bat  
-　Closure Compilerでjsファイルを圧縮するバッチ処理です。  
+　Closure Compilerでjsファイルを圧縮する際のバッチ処理です。  
 
 ・dotcloud.yml  
  dotcloud.comにデプロイするための設定ファイルです。  
