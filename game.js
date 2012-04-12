@@ -1,7 +1,6 @@
 ﻿/**
  * @license
  * Copyright (c) 2012 Haruto Watanabe
- * Copyright (c) Ubiquitous Entertainment Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,14 +68,14 @@ window.onload = function () {
     game.fps = GAME_FPS;
 
     //簡易チュートリアル
-    alert('RGBウォーズ\use enchant.js Copyright (c) Ubiquitous Entertainment Inc.');
+    alert('RGBウォーズ\n'+'このゲームはenchant.jsを使用しています Copyright (c) Ubiquitous Entertainment Inc.');
     
     if ( debug ) {
         alert('これはテスト用の大規模・高速モードです。スペック試しにどうぞ');
     } else {
         alert('このゲームは、赤・緑・青の3色が争うリアルタイムシミュレーションゲームです。');
         alert('このゲームでは1秒当たり'+game.fps+'ターンの処理が行われます。');
-        alert(game.fps*10+'ターンごとにマップ上に自陣営の色を配置することが可能になります。');
+        alert('ゲーム中は'+game.fps*10+'ターンごとにマップ上に自陣営の色を配置することが可能になります。');
         alert('あなたは赤色で、緑に強いですが青には負けてしまいます。');
         alert('100ターンの間に上手くタイルを配置して勝利してください。');
     }

@@ -1,7 +1,6 @@
 ﻿/**
  * @license
  * Copyright (c) 2012 Haruto Watanabe
- * Copyright (c) Ubiquitous Entertainment Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
